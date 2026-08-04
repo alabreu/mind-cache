@@ -10,9 +10,10 @@ const pkg = JSON.parse(
   readFileSync(new URL('./package.json', import.meta.url), 'utf-8'),
 ) as { version: string }
 
-// RENOMEIE ao criar um app novo — mantenha em sincronia com src/core/config.ts.
-const APP_NAME = 'Meu App'
-const APP_DESCRIPTION = 'Descrição curta do app (aparece no manifest e na busca).'
+// Mantenha em sincronia com src/core/config.ts e index.html.
+const APP_NAME = 'Mind Cache'
+const APP_DESCRIPTION =
+  'Captura rápida de links, ideias e trechos de texto — e busca que devolve.'
 const THEME_COLOR = '#f7f6f3'
 
 // Sha do commit para o rótulo de versão: CI (Vercel/GitHub) fornece por env

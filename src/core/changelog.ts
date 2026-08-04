@@ -19,21 +19,21 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    id: '2026-07-31-inicio',
-    date: '2026-07-31',
-    emoji: '🚀',
+    id: '2026-08-04-inicio',
+    date: '2026-08-04',
+    emoji: '🧠',
     title: {
-      pt: 'Primeira versão',
-      en: 'First release',
+      pt: 'Mind Cache no ar',
+      en: 'Mind Cache is live',
     },
     items: {
       pt: [
-        'App no ar com feedback, idioma, novidades e login opcional.',
-        'Substitua esta entrada quando lançar sua primeira feature.',
+        'Base do app montada a partir do boilerplate.',
+        'Tema claro e escuro, acompanhando o sistema.',
       ],
       en: [
-        'App is live with feedback, language, news and optional sign-in.',
-        'Replace this entry when you ship your first feature.',
+        'App foundation set up from the boilerplate.',
+        'Light and dark themes, following your system.',
       ],
     },
   },
