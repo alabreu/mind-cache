@@ -3,6 +3,7 @@ import { User } from '@phosphor-icons/react'
 import { Link } from 'react-router'
 import { getUnreadCount } from '@core/changelog'
 import { APP_NAME } from '@core/config'
+import { clearSharedDraft, readSharedDraft } from '@core/items/share'
 import {
   Button,
   buttonClasses,
@@ -63,6 +64,8 @@ export function HomeScreen() {
     reload,
   } = useItems(user?.id)
 
+  const signedIn = Boolean(user)
+
   // §7: `/` foca a busca, `n` foca a captura, `Esc` limpa.
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -96,6 +99,31 @@ export function HomeScreen() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [setQuery])
 
+  // §4.4: o que chegou por compartilhamento ou bookmarklet é SALVO, não
+  // apenas preenchido — a rota "recebe o share, salva e redireciona".
+  //
+  // Só consome com sessão: quem compartilha deslogado veria a captura sumir. O
+  // rascunho fica guardado e este effect roda de novo quando o login chega.
+  useEffect(() => {
+    if (!signedIn) return
+    let cancelled = false
+
+    void readSharedDraft(window.location.search).then(async (draft) => {
+      if (cancelled || !draft) return
+      // Limpa a URL ANTES de capturar: sem isso, um reload logo em seguida
+      // salvaria o mesmo compartilhamento outra vez.
+      if (window.location.search) {
+        window.history.replaceState(null, '', window.location.pathname)
+      }
+      await clearSharedDraft()
+      if (!cancelled) capture(draft)
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [signedIn, capture])
+
   // Paginação infinita: carrega mais ao chegar perto do fim da rolagem.
   useEffect(() => {
     const el = listRef.current
@@ -108,7 +136,6 @@ export function HomeScreen() {
     return () => el.removeEventListener('scroll', onScroll)
   }, [hasMore, loadMore])
 
-  const signedIn = Boolean(user)
   const filtering = searching || tag !== null
 
   return (

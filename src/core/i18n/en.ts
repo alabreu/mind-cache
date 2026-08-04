@@ -21,6 +21,18 @@ export const en: Record<keyof typeof pt, string> = {
   'capture.noBackendBody':
     'Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY and run the migrations for the cache to work.',
 
+  // Settings
+  'settings.title': 'Settings',
+  'settings.bookmarkletTitle': 'Capture from the browser',
+  'settings.bookmarkletBody':
+    'Drag the button below to your bookmarks bar. On any page, clicking it captures the link, the title and any selected text.',
+  'settings.bookmarkletLabel': '+ Mind Cache',
+  'settings.bookmarkletHint':
+    'If the bookmarks bar is hidden, show it before dragging.',
+  'settings.installTitle': 'Install on your phone',
+  'settings.installBody':
+    'Install the app from your browser menu. After that, Mind Cache shows up as a share target from any other app.',
+
   // Search
   'search.label': 'Search the cache',
   'search.placeholder': 'Search…',
@@ -60,6 +72,7 @@ export const en: Record<keyof typeof pt, string> = {
   'items.tagsPlaceholder': 'comma separated',
 
   // Menu
+  'menu.settings': 'Settings',
   'menu.feedback': 'Send feedback',
   'menu.language': 'Language',
   'menu.news': "What's new",

@@ -19,6 +19,18 @@ export const pt = {
   'capture.noBackendBody':
     'Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY e rode as migrações para o cache funcionar.',
 
+  // Configurações
+  'settings.title': 'Configurações',
+  'settings.bookmarkletTitle': 'Capturar do navegador',
+  'settings.bookmarkletBody':
+    'Arraste o botão abaixo para a barra de favoritos. Em qualquer página, clicar nele captura o link, o título e o texto selecionado.',
+  'settings.bookmarkletLabel': '+ Mind Cache',
+  'settings.bookmarkletHint':
+    'Se a barra de favoritos estiver escondida, mostre-a antes de arrastar.',
+  'settings.installTitle': 'Instalar no celular',
+  'settings.installBody':
+    'Instale o app pelo menu do navegador. Depois disso, o Mind Cache aparece como destino ao compartilhar de qualquer outro app.',
+
   // Busca
   'search.label': 'Buscar no cache',
   'search.placeholder': 'Buscar…',
@@ -58,6 +70,7 @@ export const pt = {
   'items.tagsPlaceholder': 'separadas por vírgula',
 
   // Menu (sheet do botão no topo direito)
+  'menu.settings': 'Configurações',
   'menu.feedback': 'Enviar feedback',
   'menu.language': 'Idioma',
   'menu.news': 'Novidades',

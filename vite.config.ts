@@ -45,6 +45,12 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
+      // `injectManifest` (e não o `generateSW` do boilerplate) porque o
+      // share_target abaixo usa POST, e só um SW escrito à mão intercepta POST.
+      // Ver src/sw.ts.
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       registerType: 'prompt',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
@@ -66,13 +72,18 @@ export default defineConfig({
             purpose: 'any maskable',
           },
         ],
+        // §4.4: receber compartilhamento do sistema. POST + multipart porque é o
+        // que o Android manda quando o usuário compartilha de outro app — GET
+        // limitaria o texto ao tamanho de uma URL.
+        share_target: {
+          action: '/share',
+          method: 'POST',
+          enctype: 'multipart/form-data',
+          params: { title: 'title', text: 'text', url: 'url' },
+        },
       },
-      workbox: {
+      injectManifest: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
-        // Once a new SW activates, take control of open pages and drop stale
-        // precaches so updates apply promptly.
-        clientsClaim: true,
-        cleanupOutdatedCaches: true,
       },
     }),
   ],

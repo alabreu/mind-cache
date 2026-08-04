@@ -13,6 +13,7 @@ import { HomeScreen } from '@ui/screens/HomeScreen'
 import { LanguageScreen } from '@ui/screens/LanguageScreen'
 import { LoginScreen } from '@ui/screens/LoginScreen'
 import { NewsScreen } from '@ui/screens/NewsScreen'
+import { SettingsScreen } from '@ui/screens/SettingsScreen'
 
 const LOCALE_STORAGE_KEY = storageKey('locale')
 
@@ -77,6 +78,7 @@ export function App() {
           <Route path="/idioma" element={<LanguageScreen />} />
           <Route path="/novidades" element={<NewsScreen />} />
           <Route path="/apoiar" element={<DonateScreen />} />
+          <Route path="/configuracoes" element={<SettingsScreen />} />
           <Route path="/login" element={<LoginScreen />} />
           <Route
             path="/admin"

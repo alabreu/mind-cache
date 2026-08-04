@@ -2,6 +2,7 @@ import type { Icon } from '@phosphor-icons/react'
 import {
   CaretRight,
   ChatCircleDots,
+  Gear,
   Heart,
   Megaphone,
   SignIn,
@@ -30,6 +31,7 @@ interface MenuItem {
 // Adicione aqui os itens específicos do seu app (configurações, importar, etc.).
 // Doação só aparece quando o Payment Link está configurado (build-time).
 const ITEMS: MenuItem[] = [
+  { icon: Gear, labelKey: 'menu.settings', to: '/configuracoes' },
   { icon: ChatCircleDots, labelKey: 'menu.feedback', to: '/feedback' },
   { icon: Translate, labelKey: 'menu.language', to: '/idioma' },
   { icon: Megaphone, labelKey: 'menu.news', to: '/novidades' },
