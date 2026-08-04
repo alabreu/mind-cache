@@ -5,8 +5,9 @@ trechos de texto — e recuperá-las depois via busca. O princípio central:
 **capturar tem que ser mais rápido do que abrir o WhatsApp**. Organização
 acontece depois, automaticamente, ou nunca. É um *cache*, não um arquivo.
 
-Escopo completo em `docs/SPEC.md`. Histórico de como o projeto começou em
-`docs/HANDOFF.md`.
+Escopo completo em `docs/SPEC.md`. **Sessão nova: leia `docs/HANDOFF.md`** — ele
+diz o que já está pronto, o que falta para o app rodar de verdade e quais
+decisões não devem ser reabertas.
 
 ## Onde a spec foi superada
 
