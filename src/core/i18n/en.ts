@@ -5,12 +5,51 @@ export const en: Record<keyof typeof pt, string> = {
   // Common
   'common.back': 'Back',
 
-  // Home (placeholder)
+  // Home
   'home.menuButton': 'Menu',
   'home.menuButtonUnread': 'Menu — unread news available',
-  'home.placeholderTitle': 'Your app starts here',
-  'home.placeholderBody':
-    'Replace this screen with your product. The top-right menu already ships with feedback, language, news and login.',
+
+  // Capture
+  'capture.label': 'Capture',
+  'capture.placeholder': 'Paste a link, jot an idea…',
+  'capture.hint': 'Enter sends · Shift+Enter adds a line',
+  'capture.signedOutTitle': 'Sign in to start',
+  'capture.signedOutBody':
+    'The cache lives in your account, so capturing needs a sign-in.',
+  'capture.signIn': 'Sign in',
+  'capture.noBackendTitle': 'Backend not configured',
+  'capture.noBackendBody':
+    'Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY and run the migrations for the cache to work.',
+
+  // List
+  'items.empty': 'Nothing cached yet.',
+  'items.emptyHint': 'Whatever you capture shows up here.',
+  'items.loadError': "Couldn't load the cache.",
+  'items.retryLoad': 'Try again',
+  'items.loadMore': 'Load more',
+  'items.loading': 'Loading…',
+  'items.pending': 'Saving…',
+  'items.failed': "Didn't save",
+  'items.retrySave': 'Try again',
+  'items.showArchived': 'Include archived',
+  'items.expand': 'Open item',
+  'items.collapse': 'Close item',
+  'items.copy': 'Copy',
+  'items.copied': 'Copied',
+  'items.open': 'Open link',
+  'items.pin': 'Pin',
+  'items.unpin': 'Unpin',
+  'items.archive': 'Archive',
+  'items.unarchive': 'Unarchive',
+  'items.delete': 'Delete',
+  'items.archivedBadge': 'archived',
+  'items.fromWhatsapp': 'from WhatsApp',
+  'items.titleLabel': 'Title',
+  'items.titlePlaceholder': 'no title',
+  'items.noteLabel': 'Note',
+  'items.notePlaceholder': 'why does this matter?',
+  'items.tagsLabel': 'Tags',
+  'items.tagsPlaceholder': 'comma separated',
 
   // Menu
   'menu.feedback': 'Send feedback',

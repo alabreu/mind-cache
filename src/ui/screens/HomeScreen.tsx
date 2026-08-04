@@ -1,30 +1,101 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { User } from '@phosphor-icons/react'
-import { APP_NAME } from '@core/config'
+import { Link } from 'react-router'
 import { getUnreadCount } from '@core/changelog'
-import { IconButton, Screen, ScreenBody } from '@ui/design'
+import { APP_NAME } from '@core/config'
+import {
+  Button,
+  buttonClasses,
+  Chip,
+  IconButton,
+  Screen,
+  ScreenBody,
+} from '@ui/design'
+import { CaptureField, type CaptureFieldHandle } from '@ui/components/CaptureField'
+import { ItemRow } from '@ui/components/ItemRow'
 import { MenuSheet } from '@ui/components/MenuSheet'
 import { useAuth } from '@ui/hooks/useAuth'
+import { useItems } from '@ui/hooks/useItems'
 import { useTranslation } from '@ui/hooks/useTranslation'
 
 /**
- * Tela inicial — placeholder para o seu produto. O que já vem pronto e deve
- * ficar: o botão do topo direito (avatar quando logado) que abre o MenuSheet,
- * com um ponto quando há novidades não lidas.
+ * A tela do produto: captura no topo, cache embaixo (§4.1 e §4.2).
+ *
+ * A captura fica FORA do corpo rolável de propósito — ela é o caminho crítico e
+ * não pode sair da tela quando a lista rola.
  */
 export function HomeScreen() {
   const { t } = useTranslation()
-  const { user } = useAuth()
+  const { user, ready, configured } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
-  // Recontado a cada montagem da Home (voltar de /novidades remonta a tela).
   const [unread] = useState(() => getUnreadCount())
+  const captureRef = useRef<CaptureFieldHandle>(null)
+  const listRef = useRef<HTMLElement>(null)
+
+  const {
+    items,
+    loading,
+    loadingMore,
+    hasMore,
+    error,
+    includeArchived,
+    setIncludeArchived,
+    capture,
+    retry,
+    patch,
+    remove,
+    loadMore,
+    reload,
+  } = useItems(user?.id)
+
+  // §7: `n` foca a captura, `Esc` limpa. (`/` foca a busca — fatia 4.)
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement | null
+      const typing =
+        target?.isContentEditable ||
+        target?.tagName === 'INPUT' ||
+        target?.tagName === 'TEXTAREA'
+
+      if (e.key === 'Escape') {
+        captureRef.current?.clear()
+        return
+      }
+      // Só sequestra a tecla quando ela não está sendo digitada em algum campo,
+      // senão escrever a letra "n" numa nota puxaria o foco para a captura.
+      if (e.key === 'n' && !typing && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault()
+        captureRef.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
+
+  // Paginação infinita: carrega mais ao chegar perto do fim da rolagem.
+  useEffect(() => {
+    const el = listRef.current
+    if (!el || !hasMore) return
+    function onScroll() {
+      if (!el) return
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 400) loadMore()
+    }
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => el.removeEventListener('scroll', onScroll)
+  }, [hasMore, loadMore])
+
+  const signedIn = Boolean(user)
 
   return (
     <Screen>
       <header className="flex items-center justify-between px-gutter pb-2 pt-3">
-        <h1 className="text-display font-extrabold tracking-tight">{APP_NAME}</h1>
+        <h1 className="text-display font-extrabold tracking-tight">
+          {APP_NAME}
+        </h1>
         <IconButton
-          aria-label={unread > 0 ? t('home.menuButtonUnread') : t('home.menuButton')}
+          aria-label={
+            unread > 0 ? t('home.menuButtonUnread') : t('home.menuButton')
+          }
           onClick={() => setMenuOpen(true)}
           className="relative"
         >
@@ -46,10 +117,79 @@ export function HomeScreen() {
         </IconButton>
       </header>
 
-      <ScreenBody as="main" centered>
-        <h2 className="text-title font-bold">{t('home.placeholderTitle')}</h2>
-        <p className="max-w-xs text-body text-muted">{t('home.placeholderBody')}</p>
-      </ScreenBody>
+      {signedIn && (
+        <div className="px-gutter pb-2">
+          <CaptureField ref={captureRef} onSubmit={capture} />
+        </div>
+      )}
+
+      {/* Sem login não há cache: a RLS amarra cada item a um dono e a v1 não tem
+          modo offline (§6), então guardar só no navegador criaria uma segunda
+          fonte da verdade que nunca sincroniza. */}
+      {ready && !signedIn ? (
+        <ScreenBody as="main" centered>
+          {/* Sem as env vars não existe para onde logar: dizer "entre" e não
+              oferecer o botão seria um beco sem saída. */}
+          <h2 className="text-title font-bold">
+            {configured
+              ? t('capture.signedOutTitle')
+              : t('capture.noBackendTitle')}
+          </h2>
+          <p className="max-w-xs text-body text-muted">
+            {configured
+              ? t('capture.signedOutBody')
+              : t('capture.noBackendBody')}
+          </p>
+          {configured && (
+            <Link to="/login" className={buttonClasses()}>
+              {t('capture.signIn')}
+            </Link>
+          )}
+        </ScreenBody>
+      ) : (
+        <ScreenBody as="main" ref={listRef}>
+          {items.length > 0 && (
+            <div className="mb-2 flex justify-end">
+              <Chip
+                selected={includeArchived}
+                onClick={() => setIncludeArchived(!includeArchived)}
+              >
+                {t('items.showArchived')}
+              </Chip>
+            </div>
+          )}
+
+          {error && (
+            <div className="flex flex-col items-center gap-2 py-8 text-center">
+              <p className="text-body text-muted">{t('items.loadError')}</p>
+              <Button onClick={reload}>{t('items.retryLoad')}</Button>
+            </div>
+          )}
+
+          {!error && !loading && items.length === 0 && (
+            <div className="flex flex-col items-center gap-1 py-12 text-center">
+              <p className="text-body font-semibold">{t('items.empty')}</p>
+              <p className="text-label text-muted">{t('items.emptyHint')}</p>
+            </div>
+          )}
+
+          {items.map((item) => (
+            <ItemRow
+              key={item.id}
+              item={item}
+              onPatch={(changes) => patch(item.id, changes)}
+              onRemove={() => remove(item.id)}
+              onRetry={() => retry(item.id)}
+            />
+          ))}
+
+          {(loading || loadingMore) && (
+            <p className="py-4 text-center text-label text-muted">
+              {t('items.loading')}
+            </p>
+          )}
+        </ScreenBody>
+      )}
 
       <MenuSheet open={menuOpen} onClose={() => setMenuOpen(false)} />
     </Screen>

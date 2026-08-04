@@ -1,9 +1,5 @@
 import { useId } from 'react'
-import type {
-  InputHTMLAttributes,
-  ReactNode,
-  TextareaHTMLAttributes,
-} from 'react'
+import type { ComponentPropsWithRef, ReactNode } from 'react'
 
 /**
  * Campos de formulário. `Field` existe para tornar o rótulo o caminho de menor
@@ -14,17 +10,20 @@ import type {
 const CONTROL =
   'w-full rounded-field bg-ink/5 px-4 py-3 text-body text-ink outline-none ring-1 ring-ink/10 placeholder:text-muted focus:ring-2 focus:ring-primary/40'
 
+// `ComponentPropsWithRef` (e não `…HTMLAttributes`) para o `ref` passar direto:
+// no React 19 ele é prop normal de componente de função, e quem precisa focar o
+// campo por atalho de teclado depende disso.
 export function Input({
   className = '',
   ...rest
-}: InputHTMLAttributes<HTMLInputElement>) {
+}: ComponentPropsWithRef<'input'>) {
   return <input className={`${CONTROL} ${className}`} {...rest} />
 }
 
 export function Textarea({
   className = '',
   ...rest
-}: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+}: ComponentPropsWithRef<'textarea'>) {
   return <textarea className={`${CONTROL} resize-none ${className}`} {...rest} />
 }
 

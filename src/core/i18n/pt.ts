@@ -3,12 +3,51 @@ export const pt = {
   // Comum
   'common.back': 'Voltar',
 
-  // Home (placeholder — substitua pelo seu produto)
+  // Home
   'home.menuButton': 'Menu',
   'home.menuButtonUnread': 'Menu — há novidades não lidas',
-  'home.placeholderTitle': 'Seu app começa aqui',
-  'home.placeholderBody':
-    'Substitua esta tela pelo seu produto. O menu no canto superior direito já vem com feedback, idioma, novidades e login.',
+
+  // Captura
+  'capture.label': 'Capturar',
+  'capture.placeholder': 'Cole um link, escreva uma ideia…',
+  'capture.hint': 'Enter envia · Shift+Enter quebra linha',
+  'capture.signedOutTitle': 'Entre para começar',
+  'capture.signedOutBody':
+    'O cache fica na sua conta, então a captura precisa de login.',
+  'capture.signIn': 'Entrar',
+  'capture.noBackendTitle': 'Falta configurar o backend',
+  'capture.noBackendBody':
+    'Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY e rode as migrações para o cache funcionar.',
+
+  // Lista
+  'items.empty': 'Nada no cache ainda.',
+  'items.emptyHint': 'O que você capturar aparece aqui.',
+  'items.loadError': 'Não deu para carregar o cache.',
+  'items.retryLoad': 'Tentar de novo',
+  'items.loadMore': 'Carregar mais',
+  'items.loading': 'Carregando…',
+  'items.pending': 'Salvando…',
+  'items.failed': 'Não salvou',
+  'items.retrySave': 'Tentar de novo',
+  'items.showArchived': 'Incluir arquivados',
+  'items.expand': 'Abrir item',
+  'items.collapse': 'Fechar item',
+  'items.copy': 'Copiar',
+  'items.copied': 'Copiado',
+  'items.open': 'Abrir link',
+  'items.pin': 'Fixar',
+  'items.unpin': 'Desafixar',
+  'items.archive': 'Arquivar',
+  'items.unarchive': 'Desarquivar',
+  'items.delete': 'Apagar',
+  'items.archivedBadge': 'arquivado',
+  'items.fromWhatsapp': 'do WhatsApp',
+  'items.titleLabel': 'Título',
+  'items.titlePlaceholder': 'sem título',
+  'items.noteLabel': 'Nota',
+  'items.notePlaceholder': 'por que isso importa?',
+  'items.tagsLabel': 'Tags',
+  'items.tagsPlaceholder': 'separadas por vírgula',
 
   // Menu (sheet do botão no topo direito)
   'menu.feedback': 'Enviar feedback',

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { ReactNode, Ref } from 'react'
 
 /**
  * Casca de tela: coluna de altura cheia com um corpo rolável. Existe porque as
@@ -17,6 +17,8 @@ export interface ScreenBodyProps {
   as?: 'div' | 'main' | 'form'
   onSubmit?: (e: React.FormEvent) => void
   role?: string
+  /** O corpo é quem rola — quem observa a rolagem (paginação infinita) precisa dele. */
+  ref?: Ref<HTMLElement>
 }
 
 export function ScreenBody({
@@ -24,10 +26,16 @@ export function ScreenBody({
   className = '',
   centered = false,
   as: Tag = 'div',
+  ref,
   ...rest
 }: ScreenBodyProps) {
+  // `Tag` é uma união de três elementos, então o TS tenta casar as props com a
+  // interseção dos três e reclama do `ref`. O ref daqui serve só para observar
+  // rolagem, que é de HTMLElement — estreitar para o JSX é seguro.
+  const Element = Tag as 'div'
   return (
-    <Tag
+    <Element
+      ref={ref as Ref<HTMLDivElement>}
       className={
         centered
           ? `flex flex-1 flex-col items-center justify-center gap-3 px-8 text-center ${className}`
@@ -36,6 +44,6 @@ export function ScreenBody({
       {...rest}
     >
       {children}
-    </Tag>
+    </Element>
   )
 }
