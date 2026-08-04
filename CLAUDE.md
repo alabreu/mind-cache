@@ -21,6 +21,17 @@ conflitam, vale o que está aqui:
 | Auth (§4.5) | Magic link e nada além | **E-mail+senha e Google**, como o boilerplate entrega | Decisão do dono: não mutilar o core por causa de um app |
 | Tema (§6) | Escolher um, sem toggle | **Acompanha o sistema** (sem `data-theme` fixo) | O boilerplate confere contraste AA nos dois temas no `npm run lint` |
 
+## Onde está cada coisa
+
+| Assunto | Arquivos |
+| --- | --- |
+| Domínio do cache | `core/items/` — `types`, `repo` (CRUD), `search`, `url`, `highlight`, `relativeTime`, `share`, `title` |
+| Estado da tela | `ui/hooks/useItems.ts` — lista, busca, captura otimista |
+| Telas próprias | `ui/screens/HomeScreen.tsx`, `SettingsScreen.tsx`; `ui/components/CaptureField`, `SearchField`, `ItemRow` |
+| Banco | `supabase/migrations/0004_items.sql` (tabela) e `0005_search_items.sql` (RPCs de busca e tags) |
+| Servidor | `supabase/functions/fetch-title/` e `supabase/functions/whatsapp/` |
+| Service worker | `src/sw.ts` — modo `injectManifest`, por causa do `share_target` com POST |
+
 ## Schema — tabela `items`
 
 Migração `supabase/migrations/0004_items.sql`. Pontos que não são óbvios:
@@ -31,6 +42,17 @@ Migração `supabase/migrations/0004_items.sql`. Pontos que não são óbvios:
   reenvia webhook em caso de falha e sem ele os itens duplicam.
 - `last_accessed_at` não é usado na v1. Existe desde já porque a v3 depende
   dela e adicionar coluna depois é mais caro.
+- **Busca:** use `word_similarity(termo, texto)`, nunca o `similarity(texto,
+  termo)` que a §4.3 pedia. `similarity` compara as strings inteiras, então o
+  score cai conforme o item cresce: medido, um item de ~55 caracteres contendo
+  "Kubernetes" dá 0.186 contra a busca "kubernets" — abaixo do corte de 0.2 —
+  enquanto `word_similarity` dá 0.800. Com `similarity` o fallback quase nunca
+  dispararia.
+- pg_trgm mora em `extensions`, não em `public`. Qualifique (`extensions.…`) ou
+  fixe o `search_path` na função; `similarity(...)` cru não resolve sozinho.
+- As migrações são rodadas **à mão no SQL Editor**, em ordem. Para testar antes,
+  dá para subir um Postgres local e stubar `auth.users`/`auth.uid()` — foi assim
+  que a 0004 e a 0005 foram validadas.
 
 ## Fora de escopo na v1
 

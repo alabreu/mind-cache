@@ -28,11 +28,17 @@ export const CHANGELOG: ChangelogEntry[] = [
     },
     items: {
       pt: [
-        'Base do app montada a partir do boilerplate.',
+        'Captura em um campo só: Enter salva, o link vira título sozinho.',
+        'Busca que entende erro de digitação, com filtro por tag.',
+        'Compartilhe de qualquer app do celular, ou use o bookmarklet no computador.',
+        'Mande no WhatsApp e o item entra no cache, com ✅ na mensagem.',
         'Tema claro e escuro, acompanhando o sistema.',
       ],
       en: [
-        'App foundation set up from the boilerplate.',
+        'One capture field: Enter saves, links get their title automatically.',
+        'Search that survives typos, with tag filters.',
+        'Share from any phone app, or use the bookmarklet on desktop.',
+        'Send it on WhatsApp and it lands in the cache, with a ✅ on the message.',
         'Light and dark themes, following your system.',
       ],
     },
