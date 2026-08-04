@@ -1,4 +1,16 @@
-# app-boilerplate
+# mind-cache
+
+> **Sessão nova: leia `docs/HANDOFF.md` antes de qualquer coisa.** Ele diz onde
+> o projeto está, quais decisões estão em aberto (a stack ainda não foi
+> definida — a spec pede Next.js, este template é React + Vite) e o que
+> perguntar antes de escrever código. A spec completa está em `docs/SPEC.md`.
+>
+> O restante deste arquivo ainda descreve o template de origem, não o Mind
+> Cache. Ele será reescrito quando as decisões do handoff forem fechadas.
+
+---
+
+# app-boilerplate (template de origem)
 
 Template de partida para apps novos (React + Vite + TS + Tailwind v4 +
 Supabase + Vercel). Extraído dos padrões do Tutor Brew
