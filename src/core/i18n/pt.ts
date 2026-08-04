@@ -19,6 +19,14 @@ export const pt = {
   'capture.noBackendBody':
     'Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY e rode as migrações para o cache funcionar.',
 
+  // Busca
+  'search.label': 'Buscar no cache',
+  'search.placeholder': 'Buscar…',
+  'search.clear': 'Limpar busca',
+  'search.noResults': 'Nada encontrado.',
+  'search.noResultsHint': 'Tente outras palavras ou tire os filtros.',
+  'search.allTags': 'Todas',
+
   // Lista
   'items.empty': 'Nada no cache ainda.',
   'items.emptyHint': 'O que você capturar aparece aqui.',

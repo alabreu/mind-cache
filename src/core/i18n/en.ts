@@ -21,6 +21,14 @@ export const en: Record<keyof typeof pt, string> = {
   'capture.noBackendBody':
     'Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY and run the migrations for the cache to work.',
 
+  // Search
+  'search.label': 'Search the cache',
+  'search.placeholder': 'Search…',
+  'search.clear': 'Clear search',
+  'search.noResults': 'Nothing found.',
+  'search.noResultsHint': 'Try other words or drop the filters.',
+  'search.allTags': 'All',
+
   // List
   'items.empty': 'Nothing cached yet.',
   'items.emptyHint': 'Whatever you capture shows up here.',

@@ -14,7 +14,8 @@ import type { Item, ItemPatch, NewItem } from './types'
 /** §4.2: paginação infinita, 30 por vez. */
 export const PAGE_SIZE = 30
 
-interface ItemRow {
+/** Exportado para `search.ts`, que lê as mesmas linhas por RPC. */
+export interface ItemRow {
   id: string
   raw_text: string
   url: string | null
@@ -31,7 +32,7 @@ interface ItemRow {
 const COLUMNS =
   'id, raw_text, url, title, note, tags, source, pinned, archived, created_at, updated_at'
 
-function toItem(row: ItemRow): Item {
+export function toItem(row: ItemRow): Item {
   return {
     id: row.id,
     rawText: row.raw_text,
@@ -56,6 +57,8 @@ export interface ListParams {
   /** Página baseada em zero. */
   page: number
   includeArchived: boolean
+  /** Chip de tag selecionado, ou null para não filtrar. */
+  tag?: string | null
 }
 
 /**
@@ -71,6 +74,7 @@ export interface ListParams {
 export async function listItems({
   page,
   includeArchived,
+  tag = null,
 }: ListParams): Promise<Item[]> {
   let query = client()
     .from('items')
@@ -80,6 +84,8 @@ export async function listItems({
     .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
 
   if (!includeArchived) query = query.eq('archived', false)
+  // `contains` vira o operador `@>` de array, que o índice GIN de tags serve.
+  if (tag) query = query.contains('tags', [tag])
 
   const { data, error } = await query
   if (error) throw new Error(error.message)

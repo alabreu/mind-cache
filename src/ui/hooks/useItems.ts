@@ -6,12 +6,13 @@ import {
   PAGE_SIZE,
   updateItem,
 } from '@core/items/repo'
+import { listTags, searchItems, type TagCount } from '@core/items/search'
 import { fetchTitle } from '@core/items/title'
 import type { Item, ItemPatch, ListedItem } from '@core/items/types'
 import { extractUrl } from '@core/items/url'
 
 /**
- * Estado da lista + captura otimista (§4.1 e §4.2).
+ * Estado da lista, da busca e da captura otimista (§4.1, §4.2 e §4.3).
  *
  * O update otimista é o ponto delicado: o item entra na tela ANTES de existir
  * no banco, com um id temporário. Enquanto está assim ele não pode ser editado
@@ -24,6 +25,9 @@ import { extractUrl } from '@core/items/url'
  * effect, some a janela de um render em que a lista antiga aparece como se
  * fosse a nova.
  */
+
+/** §4.3: debounce de 200ms. */
+const SEARCH_DEBOUNCE_MS = 200
 
 let tempCounter = 0
 const TEMP_PREFIX = 'temp:'
@@ -42,7 +46,7 @@ function toListed(item: Item): ListedItem {
 }
 
 interface LoadedState {
-  /** Qual combinação de usuário/filtro/reload estas linhas representam. */
+  /** Qual combinação de usuário/busca/filtro/reload estas linhas representam. */
   key: string
   /** De quem são estas linhas — ver o carry-over das capturas pendentes. */
   userId: string | undefined
@@ -65,6 +69,15 @@ export interface UseItems {
   loadingMore: boolean
   hasMore: boolean
   error: boolean
+  /** O que está na caixa de busca (sem debounce) — é o valor do input. */
+  query: string
+  setQuery: (value: string) => void
+  /** A busca que produziu os resultados na tela (já com debounce). */
+  activeQuery: string
+  searching: boolean
+  tag: string | null
+  setTag: (tag: string | null) => void
+  tags: TagCount[]
   includeArchived: boolean
   setIncludeArchived: (value: boolean) => void
   capture: (text: string) => void
@@ -76,12 +89,18 @@ export interface UseItems {
 }
 
 export function useItems(userId: string | undefined): UseItems {
+  const [query, setQuery] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
+  const [tag, setTag] = useState<string | null>(null)
   const [includeArchived, setIncludeArchived] = useState(false)
   const [nonce, setNonce] = useState(0)
   const [state, setState] = useState<LoadedState>(EMPTY)
   const [loadingMore, setLoadingMore] = useState(false)
+  const [tags, setTags] = useState<TagCount[]>([])
 
-  const key = `${userId ?? ''}|${includeArchived}|${nonce}`
+  const trimmedQuery = debouncedQuery.trim()
+  const searching = trimmedQuery !== ''
+  const key = `${userId ?? ''}|${trimmedQuery}|${tag ?? ''}|${includeArchived}|${nonce}`
   const loading = Boolean(userId) && state.key !== key
 
   const page = useRef(0)
@@ -97,8 +116,38 @@ export function useItems(userId: string | undefined): UseItems {
     }
   }, [])
 
-  // Primeira página sempre que muda o usuário, o filtro de arquivados ou o
-  // pedido explícito de recarregar.
+  // Debounce da busca: 200ms sem digitar antes de bater no servidor.
+  useEffect(() => {
+    if (query.trim() === '') return
+    const timer = setTimeout(() => setDebouncedQuery(query), SEARCH_DEBOUNCE_MS)
+    return () => clearTimeout(timer)
+  }, [query])
+
+  /**
+   * Limpar a caixa volta à lista completa NA HORA, sem esperar o debounce: não
+   * custa consulta extra e esperar 200ms para desfazer um filtro é fricção à
+   * toa. Feito aqui (evento do usuário) e não num effect de propósito.
+   */
+  const updateQuery = useCallback((value: string) => {
+    setQuery(value)
+    if (value.trim() === '') setDebouncedQuery('')
+  }, [])
+
+  /** Uma página, da busca ou da lista conforme o estado atual. */
+  const fetchPage = useCallback(
+    (index: number): Promise<Item[]> =>
+      searching
+        ? searchItems({
+            query: trimmedQuery,
+            includeArchived,
+            tag,
+            page: index,
+          })
+        : listItems({ page: index, includeArchived, tag }),
+    [searching, trimmedQuery, includeArchived, tag],
+  )
+
+  // Primeira página sempre que muda usuário, busca, filtro ou pedido de reload.
   useEffect(() => {
     // Deslogado não tem o que buscar, e a lista já sai vazia por derivação —
     // nada de setState aqui.
@@ -107,7 +156,7 @@ export function useItems(userId: string | undefined): UseItems {
     let cancelled = false
     page.current = 0
 
-    listItems({ page: 0, includeArchived })
+    fetchPage(0)
       .then((rows) => {
         if (cancelled) return
         setState((current) => ({
@@ -141,7 +190,25 @@ export function useItems(userId: string | undefined): UseItems {
     return () => {
       cancelled = true
     }
-  }, [key, userId, includeArchived])
+  }, [key, userId, fetchPage])
+
+  // Chips de tag. Recarregados a cada reload e a cada edição de tags (que passa
+  // pelo `patch` e incrementa o nonce) — caso contrário um chip novo só
+  // apareceria depois de recarregar a página.
+  useEffect(() => {
+    if (!userId) return
+    let cancelled = false
+    listTags()
+      .then((rows) => {
+        if (!cancelled) setTags(rows)
+      })
+      .catch(() => {
+        // Sem chips a busca continua funcionando — não vale sinalizar erro.
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [userId, nonce])
 
   /** Troca um item pelo resultado de `next`, ignorando quem já sumiu da lista. */
   const replaceItem = useCallback(
@@ -196,6 +263,12 @@ export function useItems(userId: string | undefined): UseItems {
       const url = extractUrl(trimmed)
       const now = new Date().toISOString()
 
+      // Capturar com uma busca ativa limpa a busca. O item novo quase nunca
+      // casa com o termo procurado; deixá-lo no topo de um resultado filtrado o
+      // faria sumir no próximo refetch, e o usuário não saberia se salvou.
+      updateQuery('')
+      setTag(null)
+
       drafts.current.set(id, trimmed)
       setState((current) => ({
         ...current,
@@ -220,7 +293,7 @@ export function useItems(userId: string | undefined): UseItems {
 
       void send(id, trimmed, url)
     },
-    [userId, send],
+    [userId, send, updateQuery],
   )
 
   const retry = useCallback(
@@ -252,7 +325,10 @@ export function useItems(userId: string | undefined): UseItems {
 
       void updateItem(id, changes)
         .then((saved) => {
-          if (alive.current) replaceItem(id, () => toListed(saved))
+          if (!alive.current) return
+          replaceItem(id, () => toListed(saved))
+          // Tag nova (ou última ocorrência removida) muda a régua de chips.
+          if (changes.tags) setNonce((value) => value + 1)
         })
         .catch(() => {
           if (!alive.current || !previous) return
@@ -295,7 +371,7 @@ export function useItems(userId: string | undefined): UseItems {
     if (loading || loadingMore || !state.hasMore || !userId) return
     const next = page.current + 1
     setLoadingMore(true)
-    listItems({ page: next, includeArchived })
+    fetchPage(next)
       .then((rows) => {
         if (!alive.current) return
         page.current = next
@@ -314,12 +390,14 @@ export function useItems(userId: string | undefined): UseItems {
       .catch(() => {
         // Falhar ao carregar MAIS não é o mesmo que falhar ao carregar: o que já
         // está na tela continua válido. Só para de pedir mais.
-        if (alive.current) setState((current) => ({ ...current, hasMore: false }))
+        if (alive.current) {
+          setState((current) => ({ ...current, hasMore: false }))
+        }
       })
       .finally(() => {
         if (alive.current) setLoadingMore(false)
       })
-  }, [loading, loadingMore, state.hasMore, userId, includeArchived])
+  }, [loading, loadingMore, state.hasMore, userId, fetchPage])
 
   const reload = useCallback(() => setNonce((value) => value + 1), [])
 
@@ -334,6 +412,13 @@ export function useItems(userId: string | undefined): UseItems {
     loadingMore,
     hasMore: signedIn && state.hasMore,
     error: signedIn && state.error,
+    query,
+    setQuery: updateQuery,
+    activeQuery: trimmedQuery,
+    searching,
+    tag,
+    setTag,
+    tags,
     includeArchived,
     setIncludeArchived,
     capture,

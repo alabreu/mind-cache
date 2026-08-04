@@ -11,18 +11,25 @@ import {
   Screen,
   ScreenBody,
 } from '@ui/design'
-import { CaptureField, type CaptureFieldHandle } from '@ui/components/CaptureField'
+import {
+  CaptureField,
+  type CaptureFieldHandle,
+} from '@ui/components/CaptureField'
 import { ItemRow } from '@ui/components/ItemRow'
 import { MenuSheet } from '@ui/components/MenuSheet'
+import {
+  SearchField,
+  type SearchFieldHandle,
+} from '@ui/components/SearchField'
 import { useAuth } from '@ui/hooks/useAuth'
 import { useItems } from '@ui/hooks/useItems'
 import { useTranslation } from '@ui/hooks/useTranslation'
 
 /**
- * A tela do produto: captura no topo, cache embaixo (§4.1 e §4.2).
+ * A tela do produto: captura e busca no topo, cache embaixo (§4.1 a §4.3).
  *
- * A captura fica FORA do corpo rolável de propósito — ela é o caminho crítico e
- * não pode sair da tela quando a lista rola.
+ * Captura e busca ficam FORA do corpo rolável de propósito — são o caminho
+ * crítico e não podem sair da tela quando a lista rola.
  */
 export function HomeScreen() {
   const { t } = useTranslation()
@@ -30,6 +37,7 @@ export function HomeScreen() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [unread] = useState(() => getUnreadCount())
   const captureRef = useRef<CaptureFieldHandle>(null)
+  const searchRef = useRef<SearchFieldHandle>(null)
   const listRef = useRef<HTMLElement>(null)
 
   const {
@@ -38,6 +46,13 @@ export function HomeScreen() {
     loadingMore,
     hasMore,
     error,
+    query,
+    setQuery,
+    activeQuery,
+    searching,
+    tag,
+    setTag,
+    tags,
     includeArchived,
     setIncludeArchived,
     capture,
@@ -48,7 +63,7 @@ export function HomeScreen() {
     reload,
   } = useItems(user?.id)
 
-  // §7: `n` foca a captura, `Esc` limpa. (`/` foca a busca — fatia 4.)
+  // §7: `/` foca a busca, `n` foca a captura, `Esc` limpa.
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       const target = e.target as HTMLElement | null
@@ -58,19 +73,28 @@ export function HomeScreen() {
         target?.tagName === 'TEXTAREA'
 
       if (e.key === 'Escape') {
+        // Dentro da busca, o Esc é da própria caixa (limpa sem perder o foco).
+        if (target?.id === 'search') return
         captureRef.current?.clear()
+        setQuery('')
         return
       }
+
       // Só sequestra a tecla quando ela não está sendo digitada em algum campo,
-      // senão escrever a letra "n" numa nota puxaria o foco para a captura.
-      if (e.key === 'n' && !typing && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      // senão escrever "n" numa nota puxaria o foco para a captura.
+      if (typing || e.metaKey || e.ctrlKey || e.altKey) return
+
+      if (e.key === 'n') {
         e.preventDefault()
         captureRef.current?.focus()
+      } else if (e.key === '/') {
+        e.preventDefault()
+        searchRef.current?.focus()
       }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
+  }, [setQuery])
 
   // Paginação infinita: carrega mais ao chegar perto do fim da rolagem.
   useEffect(() => {
@@ -85,6 +109,7 @@ export function HomeScreen() {
   }, [hasMore, loadMore])
 
   const signedIn = Boolean(user)
+  const filtering = searching || tag !== null
 
   return (
     <Screen>
@@ -118,8 +143,27 @@ export function HomeScreen() {
       </header>
 
       {signedIn && (
-        <div className="px-gutter pb-2">
+        <div className="flex flex-col gap-2 px-gutter pb-2">
           <CaptureField ref={captureRef} onSubmit={capture} />
+          <SearchField ref={searchRef} value={query} onChange={setQuery} />
+
+          {tags.length > 0 && (
+            <div className="-mx-gutter flex gap-1 overflow-x-auto px-gutter pb-1">
+              <Chip selected={tag === null} onClick={() => setTag(null)}>
+                {t('search.allTags')}
+              </Chip>
+              {tags.map((entry) => (
+                <Chip
+                  key={entry.tag}
+                  selected={tag === entry.tag}
+                  onClick={() => setTag(tag === entry.tag ? null : entry.tag)}
+                  className="whitespace-nowrap"
+                >
+                  #{entry.tag}
+                </Chip>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -148,7 +192,7 @@ export function HomeScreen() {
         </ScreenBody>
       ) : (
         <ScreenBody as="main" ref={listRef}>
-          {items.length > 0 && (
+          {(items.length > 0 || includeArchived) && (
             <div className="mb-2 flex justify-end">
               <Chip
                 selected={includeArchived}
@@ -168,8 +212,12 @@ export function HomeScreen() {
 
           {!error && !loading && items.length === 0 && (
             <div className="flex flex-col items-center gap-1 py-12 text-center">
-              <p className="text-body font-semibold">{t('items.empty')}</p>
-              <p className="text-label text-muted">{t('items.emptyHint')}</p>
+              <p className="text-body font-semibold">
+                {filtering ? t('search.noResults') : t('items.empty')}
+              </p>
+              <p className="text-label text-muted">
+                {filtering ? t('search.noResultsHint') : t('items.emptyHint')}
+              </p>
             </div>
           )}
 
@@ -177,6 +225,7 @@ export function HomeScreen() {
             <ItemRow
               key={item.id}
               item={item}
+              query={activeQuery}
               onPatch={(changes) => patch(item.id, changes)}
               onRemove={() => remove(item.id)}
               onRetry={() => retry(item.id)}

@@ -9,6 +9,7 @@ import {
   Archive,
   ArrowCounterClockwise,
 } from '@phosphor-icons/react'
+import { highlight } from '@core/items/highlight'
 import { formatRelativeTime } from '@core/items/relativeTime'
 import type { ItemPatch, ListedItem } from '@core/items/types'
 import { domainOf } from '@core/items/url'
@@ -28,12 +29,42 @@ const PREVIEW_CHARS = 140
 
 export interface ItemRowProps {
   item: ListedItem
+  /** Busca ativa, para realçar os termos (§4.3). Vazio quando não há busca. */
+  query?: string
   onPatch: (patch: ItemPatch) => void
   onRemove: () => void
   onRetry: () => void
 }
 
-export function ItemRow({ item, onPatch, onRemove, onRetry }: ItemRowProps) {
+/**
+ * Texto com os termos da busca realçados. Renderiza pedaços em vez de injetar
+ * HTML: `dangerouslySetInnerHTML` com texto capturado pelo usuário seria um XSS
+ * direto, e o realce não vale esse preço.
+ */
+function Highlighted({ text, query }: { text: string; query: string }) {
+  if (!query) return <>{text}</>
+  return (
+    <>
+      {highlight(text, query).map((segment, index) =>
+        segment.match ? (
+          <mark key={index} className="bg-accent/25 text-ink">
+            {segment.text}
+          </mark>
+        ) : (
+          <span key={index}>{segment.text}</span>
+        ),
+      )}
+    </>
+  )
+}
+
+export function ItemRow({
+  item,
+  query = '',
+  onPatch,
+  onRemove,
+  onRetry,
+}: ItemRowProps) {
   const { t, locale } = useTranslation()
   const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -69,7 +100,7 @@ export function ItemRow({ item, onPatch, onRemove, onRetry }: ItemRowProps) {
           className="min-w-0 flex-1 text-left"
         >
           <p className="line-clamp-2 text-body font-semibold text-ink">
-            {heading}
+            <Highlighted text={heading} query={query} />
           </p>
           <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-label text-muted">
             {domain && <span>{domain}</span>}
@@ -138,7 +169,7 @@ export function ItemRow({ item, onPatch, onRemove, onRetry }: ItemRowProps) {
       {open && (
         <div className="mt-3 flex flex-col gap-3">
           <p className="whitespace-pre-wrap break-words text-body text-ink">
-            {item.rawText}
+            <Highlighted text={item.rawText} query={query} />
           </p>
 
           <Field label={t('items.titleLabel')}>
