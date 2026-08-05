@@ -9,6 +9,13 @@ Escopo completo em `docs/SPEC.md`. **Sessão nova: leia `docs/HANDOFF.md`** — 
 diz o que já está pronto, o que falta para o app rodar de verdade e quais
 decisões não devem ser reabertas.
 
+`docs/BACKLOG.md` guarda dois backlogs separados: o **manual** (depende de ação
+do dono — conta em serviço de terceiro, cartão, decisão de gosto) e o **do
+projeto** (código e produto). Quando o dono pedir status, responda com as duas
+tabelas separadas e os emojis de prioridade (🔴 bloqueia · 🟡 importante · 🟢
+quando der). Ideia nova que aparecer na conversa e não for feita na hora entra
+lá — o combinado é que nada se perca por ter sido só mencionado.
+
 ## Onde a spec foi superada
 
 `docs/SPEC.md` foi escrito **antes** do `app-boilerplate` existir na forma
