@@ -53,6 +53,10 @@ const TOKENS_RADIUS = [
 const TOKENS_TEXT = [
   { name: 'label', cls: 'text-label' },
   { name: 'body', cls: 'text-body' },
+  // Só para campo de formulário: 16px é o mínimo que impede o iOS de dar zoom
+  // ao focar. Aparece aqui para não parecer sobra quando alguém revisar a
+  // escala e achar que dá para colapsar com `body`.
+  { name: 'input', cls: 'text-input' },
   { name: 'title', cls: 'text-title' },
   { name: 'metric', cls: 'text-metric' },
   { name: 'display', cls: 'text-display' },
