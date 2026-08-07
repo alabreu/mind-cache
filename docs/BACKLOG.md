@@ -29,7 +29,7 @@ Atualizado em 2026-08-05.
 | 🟢 | Ícones reais em `public/` | Hoje são placeholders do `npm run icons` |
 | 🟢 | Conferir a fatura do Supabase | O terceiro projeto entrou a US$ 10/mês; vale ver como o crédito de compute do Pro se aplica |
 | 🟢 | Decidir visibilidade do repo | Está **público**. A anon key é pública por design e protegida por RLS, então não é vazamento — mas é uma escolha, não um acidente a confirmar |
-| 🟡 | Decidir o destino da branch `fix/ios-input-zoom` no boilerplate | A correção do zoom no iOS está empurrada lá, com o token `--text-input`, a guarda no lint e a documentação. Falta abrir PR ou mergear na `main` — não fiz nenhum dos dois sem você mandar |
+| 🟢 | Apagar a branch `fix/ios-input-zoom` no boilerplate | Já mergeada na `main` (`f62a523`). A branch remota sobreviveu porque o proxy da sessão recusa deleção de ref, e ela aponta para o commit **anterior ao amend** — o que ainda tinha o ruído no `package-lock.json`. Apagar pelo GitHub evita alguém partir dela |
 | 🟢 | Levar a correção do teste de volta ao boilerplate | `src/core/llm/client.test.ts` crava o slug `meu-app` em vez de derivar de `storageKey()`, e quebra em todo app renomeado. Ainda **não** foi para lá — a branch acima trata só do zoom |
 | 🟢 | Domínio próprio na Vercel | Opcional |
 
