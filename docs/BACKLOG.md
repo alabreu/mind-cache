@@ -43,6 +43,7 @@ Atualizado em 2026-08-05.
 | 🟡 | `extractUrl` duplicado | Existe em `src/core/items/url.ts` e em `supabase/functions/whatsapp/lib.ts`, porque a Edge Function roda em Deno e não alcança `src/`. Os dois têm teste, mas podem divergir |
 | 🟡 | Sem teste de componente | O boilerplate não traz jsdom/testing-library, então `useItems`, `CaptureField` e `ItemRow` só têm cobertura indireta. A lógica pura tem teste |
 | 🟡 | `ALLOWED_ORIGIN` das Edge Functions está `*` | Restringir ao domínio da Vercel depois que ele estabilizar |
+| 🟡 | `LoginScreen` não trata "confirme seu e-mail" | Vem do boilerplate: o `signUp` só reage à sessão aparecer. Com a confirmação de e-mail ligada, o cadastro parece não fazer nada — sem mensagem e sem erro. Correção vale para o boilerplate também |
 | 🟢 | Chaves i18n sem uso | `items.expand`, `items.collapse` e `items.loadMore` foram criadas e não são usadas em tela. Ou usar (rótulo do botão de expandir melhora leitor de tela) ou remover |
 | 🟢 | `openrouter.ai` no `connect-src` da CSP | Herdado do boilerplate; LLM está fora do escopo da v1, então poderia sair |
 | 🟢 | DNS rebinding no `fetch-title` | Limite conhecido e documentado no arquivo: a trava é por hostname, e o runtime não expõe o que seria preciso para fechar de verdade |
