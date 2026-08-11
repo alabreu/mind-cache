@@ -43,6 +43,7 @@ Atualizado em 2026-08-05.
 | 🟡 | Densidade da §7 | O design system do boilerplate é espaçoso; a §7 pede terminal — fonte pequena, denso, alto contraste. Precisa de variantes novas em `src/ui/design/`, não de classe solta na tela |
 | 🟡 | `extractUrl` duplicado | Existe em `src/core/items/url.ts` e em `supabase/functions/whatsapp/lib.ts`, porque a Edge Function roda em Deno e não alcança `src/`. Os dois têm teste, mas podem divergir |
 | 🟡 | Sem teste de componente | O boilerplate não traz jsdom/testing-library, então `useItems`, `CaptureField` e `ItemRow` só têm cobertura indireta. A lógica pura tem teste |
+| 🟡 | Botão do Google aparece com o provedor desligado | Vem do boilerplate. Clicar leva a uma página de JSON cru (`provider is not enabled`) fora do app, em vez de o botão simplesmente não existir. O endpoint `/auth/v1/settings` do Supabase informa quais provedores estão ligados — dá para esconder o botão sozinho, sem env var nova |
 | 🟡 | `ALLOWED_ORIGIN` das Edge Functions está `*` | Restringir ao domínio da Vercel depois que ele estabilizar |
 | 🟢 | Chaves i18n sem uso | `items.expand`, `items.collapse` e `items.loadMore` foram criadas e não são usadas em tela. Ou usar (rótulo do botão de expandir melhora leitor de tela) ou remover |
 | 🟢 | `openrouter.ai` no `connect-src` da CSP | Herdado do boilerplate; LLM está fora do escopo da v1, então poderia sair |
