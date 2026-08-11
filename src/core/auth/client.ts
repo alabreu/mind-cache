@@ -20,6 +20,15 @@ function toUser(user: User | null | undefined): AuthUser | null {
   }
 }
 
+export interface SignUpResult {
+  /**
+   * `true` quando o cadastro não abriu sessão porque falta confirmar o e-mail.
+   * Quem chama precisa mostrar "confira sua caixa de entrada" em vez de seguir
+   * como se tivesse logado.
+   */
+  needsEmailConfirmation: boolean
+}
+
 export const authClient = {
   /** Se as chaves do backend estão presentes (login disponível). */
   configured: backendConfigured,
@@ -39,10 +48,22 @@ export const authClient = {
     return () => data.subscription.unsubscribe()
   },
 
-  async signUp(email: string, password: string): Promise<void> {
+  /**
+   * Cria a conta. O retorno importa: com "Confirm email" ligado no Supabase o
+   * cadastro NÃO abre sessão — o usuário precisa clicar no link antes. Sem
+   * saber disso, a UI acha que logou e manda o usuário para uma tela que vai
+   * tratá-lo como deslogado.
+   *
+   * Não dá (nem se deve) distinguir "conta criada" de "e-mail já cadastrado":
+   * com a confirmação ligada o Supabase devolve a mesma resposta para os dois
+   * casos, de propósito, para o formulário não virar um verificador de quais
+   * e-mails têm conta. A UI diz a mesma coisa nos dois casos.
+   */
+  async signUp(email: string, password: string): Promise<SignUpResult> {
     if (!supabase) throw new Error('auth-not-configured')
-    const { error } = await supabase.auth.signUp({ email, password })
+    const { data, error } = await supabase.auth.signUp({ email, password })
     if (error) throw error
+    return { needsEmailConfirmation: !data.session }
   },
 
   async signIn(email: string, password: string): Promise<void> {

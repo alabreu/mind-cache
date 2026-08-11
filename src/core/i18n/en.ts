@@ -93,6 +93,11 @@ export const en: Record<keyof typeof pt, string> = {
   'auth.guestNote': 'You can keep using the app without an account.',
   'auth.soon': 'Sign-in will be available soon.',
   'auth.error': "Couldn't sign in. Check your details and try again.",
+  'auth.checkEmailTitle': 'Confirm your email',
+  'auth.checkEmailBody':
+    "If this address doesn't have an account yet, we sent a confirmation link to {email}. Open it to activate the account and sign in.",
+  'auth.checkEmailSpam': "Didn't arrive? Check your spam — it can take a few minutes.",
+  'auth.backToSignIn': 'Back to sign in',
   'auth.signedInAs': 'Signed in as',
   'auth.signOut': 'Sign out',
 

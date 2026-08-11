@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { GoogleLogo, SignOut } from '@phosphor-icons/react'
+import { Envelope, GoogleLogo, SignOut } from '@phosphor-icons/react'
 import { useNavigate } from 'react-router'
 import { Button, Input, Screen, ScreenBody } from '@ui/design'
 import { ScreenHeader } from '@ui/components/ScreenHeader'
@@ -22,6 +22,11 @@ export function LoginScreen() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
   const [busy, setBusy] = useState(false)
+  // E-mail para o qual o link de confirmação saiu. Enquanto estiver preenchido,
+  // a tela mostra "confira sua caixa de entrada" no lugar do formulário.
+  const [confirmationSentTo, setConfirmationSentTo] = useState<string | null>(
+    null,
+  )
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
@@ -29,14 +34,30 @@ export function LoginScreen() {
     setBusy(true)
     setError(false)
     try {
-      if (mode === 'signup') await signUp(email, password)
-      else await signIn(email, password)
+      if (mode === 'signup') {
+        const { needsEmailConfirmation } = await signUp(email, password)
+        // Sem sessão não há para onde navegar: a home trataria o usuário como
+        // deslogado e o cadastro pareceria não ter feito nada.
+        if (needsEmailConfirmation) {
+          setConfirmationSentTo(email)
+          return
+        }
+      } else {
+        await signIn(email, password)
+      }
       navigate('/')
     } catch {
       setError(true)
     } finally {
       setBusy(false)
     }
+  }
+
+  function backToSignIn() {
+    setConfirmationSentTo(null)
+    setMode('signin')
+    setPassword('')
+    setError(false)
   }
 
   async function google() {
@@ -57,6 +78,21 @@ export function LoginScreen() {
           <p className="mt-10 text-center text-body text-muted">
             {t('auth.soon')}
           </p>
+        ) : confirmationSentTo ? (
+          <div
+            role="status"
+            className="mt-6 flex flex-col items-center gap-3 text-center"
+          >
+            <Envelope size={40} weight="duotone" />
+            <h2 className="text-title font-bold">{t('auth.checkEmailTitle')}</h2>
+            <p className="text-body text-muted">
+              {t('auth.checkEmailBody', { email: confirmationSentTo })}
+            </p>
+            <p className="text-label text-muted">{t('auth.checkEmailSpam')}</p>
+            <Button variant="secondary" size="sm" onClick={backToSignIn}>
+              {t('auth.backToSignIn')}
+            </Button>
+          </div>
         ) : user ? (
           <div className="mt-6 flex flex-col items-center gap-4 text-center">
             {user.avatarUrl && (

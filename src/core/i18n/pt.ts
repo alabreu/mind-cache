@@ -91,6 +91,11 @@ export const pt = {
   'auth.guestNote': 'Você pode continuar usando sem conta.',
   'auth.soon': 'O login estará disponível em breve.',
   'auth.error': 'Não deu para entrar. Confira os dados e tente de novo.',
+  'auth.checkEmailTitle': 'Confirme seu e-mail',
+  'auth.checkEmailBody':
+    'Se este endereço ainda não tiver conta, enviamos um link de confirmação para {email}. Abra o link para ativar a conta e entrar.',
+  'auth.checkEmailSpam': 'Não chegou? Confira o spam — pode levar alguns minutos.',
+  'auth.backToSignIn': 'Voltar para entrar',
   'auth.signedInAs': 'Conectado como',
   'auth.signOut': 'Sair',
 
