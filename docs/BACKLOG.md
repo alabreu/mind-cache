@@ -10,7 +10,7 @@ Dois backlogs, de propósito separados:
 
 Prioridade: 🔴 bloqueia · 🟡 importante, não bloqueia · 🟢 quando der
 
-Atualizado em 2026-08-05.
+Atualizado em 2026-09-13.
 
 ---
 
@@ -18,9 +18,8 @@ Atualizado em 2026-08-05.
 
 | | Item | Por quê / detalhe |
 | --- | --- | --- |
-| 🔴 | Env vars na Vercel + redeploy | `VITE_SUPABASE_URL=https://rsbphkkjxookwpvkgjsi.supabase.co` e a anon key. São de **build**, então só valem em deploy novo. Sem isso o app fica na tela "falta configurar o backend" |
-| 🔴 | Redirect URLs no Supabase | Authentication → URL Configuration: `https://mind-cache-umber.vercel.app` e `http://localhost:5173`. Sem isso o login volta para o lugar errado |
-| 🟡 | Criar a própria conta no app | O primeiro login gera o `user_id` que vira o `MIND_CACHE_OWNER_ID` do webhook. Nada do WhatsApp anda antes disso |
+| 🟡 | Criar a própria conta no app | **Onde a última sessão parou.** A tentativa foi pelo Google, que não está habilitado — use e-mail e senha, que já funciona. O primeiro login gera o `user_id` que vira o `MIND_CACHE_OWNER_ID`. Nada do WhatsApp anda antes disso |
+| 🟡 | Revisar o PR #13 do Dependabot | Aberto em 08/09, 8 atualizações menores (supabase-js, react-router, zustand, vite, vitest…). O preview da Vercel está verde. Aceitar bump de dependência é decisão sua, mas eu mergeio se você pedir |
 | 🟡 | SMTP customizado no Supabase | O SMTP padrão manda poucos e-mails por hora e a própria documentação do Supabase diz que não é para produção. Para uso só seu funciona; vira **pré-requisito** no dia que abrir para outros usuários, porque é dele que depende o link de confirmação |
 | 🟡 | Credenciais OAuth do Google | Só se quiser o login com Google: criar no Google Cloud Console (tipo "Web application", redirect `https://rsbphkkjxookwpvkgjsi.supabase.co/auth/v1/callback`) e colar no Supabase |
 | 🟡 | App na Meta / WhatsApp Cloud API | Obter `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_APP_SECRET`, escolher o `WHATSAPP_VERIFY_TOKEN` e apontar o webhook para `https://rsbphkkjxookwpvkgjsi.supabase.co/functions/v1/whatsapp` |
